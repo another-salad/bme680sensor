@@ -10,15 +10,15 @@
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function() {
             // Connect to the Socket.IO server.
-            // The connection URL has the following format, relative to the current page:
-            //     http[s]://<domain>:<port>[/<namespace>]
             var socket = io();
 
-            // Event handler for new connections.
-            // The callback function is invoked when a connection with the
-            // server is established.
+            // Event handlers for connections.
             socket.on('connect', function() {
-                socket.emit('my_event', {data: 'I\'m connected!'});
+                socket.emit('initialConnect');
+            });
+            socket.on('setTemp', function(data) {
+                var temp = document.getElementById("tempData")
+                temp.textContent = data;
             });
         });
     </script>
@@ -72,6 +72,7 @@
                     <div class="col-md-6 border rounded border-light">
                         <div class="h-100 p-5 text-white bg-dark rounded-3">
                             <h2>Temperature</h2>
+                            <div id="tempData"></div>
                         </div>
                     </div>
                     <div class="col-md-6 border rounded border-light">
