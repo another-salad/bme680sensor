@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <title>BME680 Sensor Data</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+    <script src="../static/socket-io/socket.io.js" ></script>
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function() {
+            // Connect to the Socket.IO server.
+            // The connection URL has the following format, relative to the current page:
+            //     http[s]://<domain>:<port>[/<namespace>]
+            var socket = io();
+
+            // Event handler for new connections.
+            // The callback function is invoked when a connection with the
+            // server is established.
+            socket.on('connect', function() {
+                socket.emit('my_event', {data: 'I\'m connected!'});
+            });
+        });
+    </script>
+    <!-- Bootstrap core CSS -->
+    <link href="../static/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+
+        @media (min-width: 1400px) {
+            .container, .container-lg, .container-md, .container-sm, .container-xl, .container-xxl {
+                max-width: 1820px;
+            }
+        }
+
+        .full-height {
+            height: 100%;
+        }
+
+        .sticky-footer {
+            position: absolute;
+            bottom: 0;
+        }
+
+    </style>
+
+  </head>
+  <body>
+        <main class="bg-dark full-height">
+            <div class="container py-4 bg-dark">
+                <header class="pb-3 mb-4 border-bottom">
+                    <h1 class="d-flex align-items-center text-light text-decoration-none">BME680 Sensor Data</h1>
+                </header>
+                <div class="row align-items-md-stretch">
+                    <div class="col-md-6 border rounded border-light">
+                        <div class="h-100 p-5 text-white bg-dark rounded-3">
+                            <h2>Temperature</h2>
+                        </div>
+                    </div>
+                    <div class="col-md-6 border rounded border-light">
+                        <div class="h-100 p-5 text-white bg-dark rounded-3 border-light">
+                            <h2>Humidity</h2>
+                        </div>
+                    </div>
+                    <div class="col-md-6 border rounded border-light">
+                        <div class="h-100 p-5 text-white bg-dark rounded-3 border-light">
+                            <h2>Air Quality</h2>
+                        </div>
+                    </div>
+                    <div class="col-md-6 border rounded border-light">
+                        <div class="h-100 p-5 text-white bg-dark rounded-3 border-light">
+                            <h2>Pressure</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </body>
+</html>

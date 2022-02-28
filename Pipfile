@@ -1,0 +1,15 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+adafruit-circuitpython-bme680 = "*"
+flask-socketio = "*"
+gevent = "*"
+gevent-websocket = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"
