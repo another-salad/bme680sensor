@@ -11,14 +11,29 @@
         $(document).ready(function() {
             // Connect to the Socket.IO server.
             var socket = io();
-
+            let watchID;
+            function setData(data, elementID) {
+                var element = document.getElementById(elementID);
+                element.textContent = data;
+            }
             // Event handlers for connections.
             socket.on('connect', function() {
-                socket.emit('initialConnect');
+                socket.emit('query');
             });
-            socket.on('setTemp', function(data) {
-                var temp = document.getElementById("tempData")
-                temp.textContent = data;
+            socket.on('getTemp', function(data) {
+                setData(data, "tempData");
+            });
+            socket.on('getHumidity', function(data) {
+                setData(data, "humidityData");
+            });
+            socket.on('getAirQuality', function(data) {
+                setData(data, "airQualityData");
+            });
+            socket.on('getPressure', function(data) {
+                setData(data, "pressureData");
+            });
+            socket.on('query', function() {
+                socket.emit('query');
             });
         });
     </script>
@@ -78,16 +93,19 @@
                     <div class="col-md-6 border rounded border-light">
                         <div class="h-100 p-5 text-white bg-dark rounded-3 border-light">
                             <h2>Humidity</h2>
+                            <div id="humidityData"></div>
                         </div>
                     </div>
                     <div class="col-md-6 border rounded border-light">
                         <div class="h-100 p-5 text-white bg-dark rounded-3 border-light">
                             <h2>Air Quality</h2>
+                            <div id="airQualityData"></div>
                         </div>
                     </div>
                     <div class="col-md-6 border rounded border-light">
                         <div class="h-100 p-5 text-white bg-dark rounded-3 border-light">
                             <h2>Pressure</h2>
+                            <div id="pressureData"></div>
                         </div>
                     </div>
                 </div>
