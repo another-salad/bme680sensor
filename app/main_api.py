@@ -1,8 +1,8 @@
 """main"""
 
-from time import sleep
+import json
 
-from flask import Flask, render_template
+from flask import Flask, jsonify, render_template
 from flask_socketio import SocketIO, emit
 
 from common.config_reader import get_conf
@@ -41,6 +41,17 @@ def _set_sensor_values(bme_sensor):
             bme_sensor.update(attrib)
     
     emit('query')
+
+@app.route('/api')
+def api() -> json:
+    """api call, returns all sensor data as json"""
+    return_data = {}
+    for attrib in dir(bme_sensor.watch_obj):
+        if attrib.startswith('get'):
+            key, value = getattr(bme_sensor.watch_obj, attrib)
+            return_data[key.strip('get')] = value
+
+    return jsonify(return_data)
 
 @app.route('/')
 def index():
