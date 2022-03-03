@@ -17,24 +17,31 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = CONFIG.SECRET_KEY
 socketio = SocketIO(app)
 
-class Emitter:
-    """Emits the sensor properties to a connected client"""
+class Watcher:
+    """Watches the sensor properties, emits on change to a connected client"""
+
+    watch_cache = {}
 
     def __init__(self, watch_obj):
         """init baby"""
         self.watch_obj = watch_obj
 
     def update(self, attrib):
-        """emits updated value for attrib"""
+        """Checks the cache, updates on value change, else just emits 'query' to keep the cycle going."""
         if hasattr(self.watch_obj, attrib):
-            property, value = getattr(self.watch_obj, attrib)
-            emit(property, value)
+            prop, value = getattr(self.watch_obj, attrib)
+            if self.watch_cache.get(prop, None) is None or self.watch_cache[prop] != value:
+                self.watch_cache[prop] = value
+                emit(prop, value)
+                return
+
+        emit('query')
 
 # BME Sensor
-bme_sensor = Emitter(BMESensorProperties(CONFIG))
+bme_sensor = Watcher(BMESensorProperties(CONFIG))
 
 def _set_sensor_values(bme_sensor):
-    """Sends the sensor values to the client via the Emitter, then emits query so the
+    """Sends the sensor values to the client via the Watcher, then emits query so the
     client asks for an update."""
     for attrib in dir(bme_sensor.watch_obj):
         if attrib.startswith('get'):
