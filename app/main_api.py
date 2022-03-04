@@ -1,8 +1,9 @@
 """main"""
 
 import json
+from hashlib import sha1
 
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 from flask_socketio import SocketIO, emit
 
 from common.config_reader import get_conf
@@ -20,22 +21,32 @@ socketio = SocketIO(app)
 class Watcher:
     """Watches the sensor properties, emits on change to a connected client"""
 
-    watch_cache = {}
+    watch_cache = dict()
+    active_connections = set()
 
     def __init__(self, watch_obj):
         """init baby"""
         self.watch_obj = watch_obj
 
-    def update(self, attrib):
+    def update(self, attrib: str):
         """Checks the cache, updates on value change, else just emits 'query' to keep the cycle going."""
-        if hasattr(self.watch_obj, attrib):
-            prop, value = getattr(self.watch_obj, attrib)
-            if self.watch_cache.get(prop, None) is None or self.watch_cache[prop] != value:
-                self.watch_cache[prop] = value
-                emit(prop, value)
-                return
+        for active_conn in self.active_connections:
+            active_conn_sha = sha1(repr(active_conn).encode('utf-8'), usedforsecurity=False).hexdigest()
+            if hasattr(self.watch_obj, attrib):
+                prop, value = getattr(self.watch_obj, attrib)
+                # TODO: FIX THIS FUCKING THING - it needs a clean OK
+                # START OF CLEAN
+                if (self.watch_cache.get(active_conn_sha, None) is None):
+                    # creates the initial dict
+                    self.watch_cache[active_conn_sha] = dict()
 
-        emit('query')
+                if (self.watch_cache[active_conn_sha].get(prop, None) is None):
+                    self.watch_cache[active_conn_sha].update({prop: value})
+                    emit(prop, value, room=active_conn)
+                elif (self.watch_cache[active_conn_sha][prop] != value):
+                    self.watch_cache[active_conn_sha][prop] = value
+                    emit(prop, value, room=active_conn)
+                # END OF CLEAN
 
 # BME Sensor
 bme_sensor = Watcher(BMESensorProperties(CONFIG))
@@ -60,20 +71,31 @@ def api() -> json:
 
     return jsonify(return_data)
 
+@socketio.on('connect')
+def connected():
+    bme_sensor.active_connections.add(request.sid)
+    print(bme_sensor.active_connections)
+    emit('connect')
+
+
+@socketio.on('disconnected')
+def disconnected():
+    print("disconnect")
+    bme_sensor.active_connections.remove(request.sid)
+    print(bme_sensor.active_connections)
+
+
 @app.route('/')
 def index():
     """Main html page"""
     return render_template('index.html', async_mode=socketio.async_mode)
+
 
 @socketio.on('query')
 def query():
     """Updates sensor values"""
     _set_sensor_values(bme_sensor)
 
-@socketio.on('disconnect')
-def disconnect():
-    """This currently does nothing"""
-    pass
 
 if __name__ == '__main__':
     socketio.run(app, host="0.0.0.0")
