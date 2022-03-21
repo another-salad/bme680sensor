@@ -34,19 +34,16 @@ class Watcher:
             active_conn_sha = sha1(repr(active_conn).encode('utf-8'), usedforsecurity=False).hexdigest()
             if hasattr(self.watch_obj, attrib):
                 prop, value = getattr(self.watch_obj, attrib)
-                # TODO: FIX THIS FUCKING THING - it needs a clean OK
-                # START OF CLEAN
                 if (self.watch_cache.get(active_conn_sha, None) is None):
                     # creates the initial dict
                     self.watch_cache[active_conn_sha] = dict()
 
                 if (self.watch_cache[active_conn_sha].get(prop, None) is None):
                     self.watch_cache[active_conn_sha].update({prop: value})
-                    emit(prop, value, room=active_conn)
                 elif (self.watch_cache[active_conn_sha][prop] != value):
                     self.watch_cache[active_conn_sha][prop] = value
-                    emit(prop, value, room=active_conn)
-                # END OF CLEAN
+
+                emit(prop, value, room=active_conn)
 
 # BME Sensor
 bme_sensor = Watcher(BMESensorProperties(CONFIG))
@@ -67,22 +64,19 @@ def api() -> json:
     for attrib in dir(bme_sensor.watch_obj):
         if attrib.startswith('get'):
             key, value = getattr(bme_sensor.watch_obj, attrib)
-            return_data[key.strip('get')] = value
+            return_data[key.replace('get', '')] = value
 
     return jsonify(return_data)
 
 @socketio.on('connect')
 def connected():
     bme_sensor.active_connections.add(request.sid)
-    print(bme_sensor.active_connections)
     emit('connect')
 
 
 @socketio.on('disconnected')
 def disconnected():
-    print("disconnect")
     bme_sensor.active_connections.remove(request.sid)
-    print(bme_sensor.active_connections)
 
 
 @app.route('/')
