@@ -21,7 +21,7 @@ function setAirValue(airValue)
     airQualityValues.push(airValue);
     minVal = Math.min(...airQualityValues);
     maxVal = Math.max(...airQualityValues);
-    if (maxVal - minVal <= 500) {
+    if (airValue - minVal <= 500) {
         document.getElementById("airQualCol").style.backgroundColor = "#5dade2";
     }
     else
