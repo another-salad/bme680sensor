@@ -1,18 +1,17 @@
 // Element colours
-function setTempColor(value)
-{   
-    let bgcolor;
-    if (value < 18) {
-        bgcolor = "#87CEEB";
+let blue = "#5dade2";
+let green = "#198754";
+let orange = "#f39c12";
+let red = "#CB4335";
+
+function setColorIfTrue(elementID, options)
+{
+    for (let elem of options) {
+        if (elem[0]) {
+            document.getElementById(elementID).style.backgroundColor = elem[1];
+            break;
+        }
     }
-    else if (value > 18 && value < 24) {
-        bgcolor = "#198754";
-    }
-    else
-    {
-        bgcolor = "#CB4335";
-    }
-    document.getElementById("tempDataCol").style.backgroundColor = bgcolor;
 }
 
 let airQualityValues = [];
@@ -21,13 +20,9 @@ function setAirValue(airValue)
     airQualityValues.push(airValue);
     minVal = Math.min(...airQualityValues);
     maxVal = Math.max(...airQualityValues);
-    if (airValue - minVal <= 500) {
-        document.getElementById("airQualCol").style.backgroundColor = "#5dade2";
-    }
-    else
-    {
-        document.getElementById("airQualCol").style.backgroundColor = "#f39c12";
-    }
+    let arr = [[(airValue - minVal <= 500), blue], [true, orange]];
+    // Set colour and element values
+    setColorIfTrue("airQualCol", arr);
     document.getElementById("airQualityData").textContent = "".concat("Lowest: ", minVal, ". Highest: ", maxVal, ". Current: ", airValue);
 }
 
@@ -46,13 +41,15 @@ $(document).ready(function() {
     });
     socket.on('getTemp', function(data) {
         setData(data, "tempData");
-        setTempColor(data);
+        let arr = [[(data < 18), blue], [(data > 18 && data < 24), green], [true, red]];
+        setColorIfTrue("tempDataCol", arr);
     });
     socket.on('getHumidity', function(data) {
         setData(data, "humidityData");
+        let arr = [[(data >= 30 && data <= 60), green], [true, orange]];
+        setColorIfTrue("humidityDataCol", arr);
     });
     socket.on('getAirQuality', function(data) {
-        // setData(data, "airQualityData");
         setAirValue(data);
     });
     socket.on('getPressure', function(data) {
