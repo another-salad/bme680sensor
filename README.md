@@ -1,2 +1,3 @@
-# bme680sensor
-a websocket server based on Flask-Socket IO, pumping out all the info I can get from a BME 680 sensor
+Contains a py3 and circuitPy implementation.
+
+Look in the appropriate DIRs for more.
