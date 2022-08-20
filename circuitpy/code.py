@@ -103,11 +103,12 @@ def get_readings(_):
     """Gets the current sensor readings"""
     sensor_data = {
         "loc": LOCATION,
-        "temp": bme680.temperature - 4,  # Account for temp elevation from sensor itself
+        "temp": bme680.temperature - 5,  # Account for temp elevation from sensor itself
         "gas (ohm)": bme680.gas,
         "humidity": bme680.relative_humidity,
         "pressure (hPa)": bme680.pressure,
-        "altitude (meters)": bme680.altitude
+        "altitude (meters)": bme680.altitude,
+        "error": False  # Hacks
     }
     return ("200 OK", [], [json.dumps(sensor_data)])
 
