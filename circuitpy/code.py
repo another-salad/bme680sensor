@@ -102,8 +102,8 @@ bme680.sea_level_pressure = 1013.25
 def get_readings(_):
     """Gets the current sensor readings"""
     sensor_data = {
-        "location": LOCATION,
-        "temp (Centigrade)": bme680.temperature,
+        "loc": LOCATION,
+        "temp": bme680.temperature - 4,  # Account for temp elevation from sensor itself
         "gas (ohm)": bme680.gas,
         "humidity": bme680.relative_humidity,
         "pressure (hPa)": bme680.pressure,
