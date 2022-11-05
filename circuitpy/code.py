@@ -23,13 +23,14 @@ SPI0_CSN = board.GP17
 ##reset
 W5X00_RSTN = board.GP20
 
-# Sensor location
-LOCATION = "DEFAULT ROOM"
 
 def _get_config():
     """Gets the config from config.json"""
     with open("config.json", "r", encoding="UTF-8") as json_file:
         return json.load(json_file)
+
+# Config file for sensor
+CONFIG = _get_config()
 
 def config_eth():
     """Configures the ethernet adaptor, return initialized ethernet object"""
@@ -44,14 +45,13 @@ def config_eth():
     ethernet_rst.value = True
 
     # Setup network from config.json file
-    net_config = _get_config()
-    if not net_config.get("mac", ""):
+    if not CONFIG.get("mac", ""):
         raise Exception("Mac address must be present in config file!")
 
-    mac_addr = tuple((int(x, 16) for x in net_config["mac"].split(":")))
+    mac_addr = tuple((int(x, 16) for x in  CONFIG["mac"].split(":")))
 
     # Prints go into serial stdout (nice for debugging)
-    if not net_config.get("ipv4_addr", ""):
+    if not CONFIG.get("ipv4_addr", ""):
         print("Assuming DHCP setup as no ip address specified in config file")
         eth = WIZNET5K(spi_bus, chip_select_pin, is_dhcp=True, mac=mac_addr, debug=False)
     else:
@@ -60,12 +60,12 @@ def config_eth():
         formated_config = {}
         # Add the ipv4_addr here although we know its already present, this is the easiest way to format the value for eth.ifconfig()
         for required_key in ["ipv4_addr", "subnet_mask", "default_gateway", "dns"]:
-            if not net_config.get(required_key, ""):
+            if not CONFIG.get(required_key, ""):
                 print(f"Missing required config: {required_key}")
                 missing_config = True
                 continue
 
-            formated_config[required_key] = tuple(int(x) for x in net_config[required_key].split("."))
+            formated_config[required_key] = tuple(int(x) for x in  CONFIG[required_key].split("."))
 
         if missing_config:
             raise Exception("Please review config.json file!")
@@ -102,8 +102,8 @@ bme680.sea_level_pressure = 1013.25
 def get_readings(_):
     """Gets the current sensor readings"""
     sensor_data = {
-        "loc": LOCATION,
-        "temp": bme680.temperature - 5,  # Account for temp elevation from sensor itself
+        "loc": CONFIG["location"],
+        "temp": bme680.temperature - 1,  # Account for temp elevation from sensor itself
         "gas (ohm)": bme680.gas,
         "humidity": bme680.relative_humidity,
         "pressure (hPa)": bme680.pressure,
